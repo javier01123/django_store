@@ -4,20 +4,31 @@ services:
     app:
       build:
         context: .
+        args:
+          - DEV=true
       ports:
         - "8000:8000"
       volumes:
         - ./src:/code
       command: >
         sh -c "python manage.py runserver 0.0.0.0:8000"
-    # database:
-    #     container_name: postgres
-    #     image: postgres:15.0
-    #     environment:
-    #         - POSTGRES_DB=${POSTGRES_DB}
-    #         - POSTGRES_USER=${POSTGRES_USER}
-    #         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    #     ports:
-    #         - "${POSTGRES_PORT}:5432"
-    #     volumes:
-    #         - ./data/db:/var/lib/postgresql/data
+      environment:
+        - DB_HOST=db
+        - DB_NAME=djangostore_db
+        - DB_USER=devuser
+        - DB_PASS=changeme
+      depends_on:
+        - db
+    db:
+        container_name: postgres
+        image: postgres:15-alpine
+        environment:
+            - POSTGRES_DB=djangostore_db
+            - POSTGRES_USER=devuser
+            - POSTGRES_PASSWORD=changeme
+        ports:
+            - "${POSTGRES_PORT}:5432"
+        volumes:
+            - django-store-data:/var/lib/postgresql/data
+volumes:
+  django-store-data:
